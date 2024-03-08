@@ -34,3 +34,4 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 to_do/package.json
+to_do/package.json
