@@ -46,8 +46,8 @@ export default function App() {
         setLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitudeDelta: 0.0122,
+          longitudeDelta: 0.021,
         });
         setLatitude(location.coords.latitude); // Salvando a latitude
         setLongitude(location.coords.longitude); // Salvando a longitude
@@ -66,7 +66,7 @@ export default function App() {
       latitude: coordinate.latitude,
       longitude: coordinate.longitude,
       latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
+      longitudeDelta: 0.0921,
     });
 
     // Salvando os valores de latitude e longitude

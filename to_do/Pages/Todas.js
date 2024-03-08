@@ -9,14 +9,12 @@ import {
   Button,
   Platform,
   Alert,
-  StyleSheet
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import styles from '../Styles/Todas.js';
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
-import Mapa from '../Components/mapa.js'
 import { getLatitude } from '../Components/mapa.js';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -24,67 +22,10 @@ import * as Location from 'expo-location';
 export default function App() {
   const navigation = useNavigation();
 
-  //mapa
   const [location, setLocation] = useState(null);
   const [markerLocation, setMarkerLocation] = useState(null);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null); // Estado adicionado para armazenar os valores de latitude e longitude
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permissão de localização negada');
-        return;
-      }
-  
-      let locationWatcher = await Location.watchPositionAsync({
-        accuracy: Location.Accuracy.High,
-        timeInterval: 1000,
-        distanceInterval: 1
-      }, (location) => {
-        setLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.0122,
-          longitudeDelta: 0.021,
-        });
-        setLatitude(location.coords.latitude);
-        setLongitude(location.coords.longitude);
-        // Definindo a localização atual como o valor inicial do marcador
-        setMarkerLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0921,
-        });
-      });
-  
-      return () => {
-        locationWatcher.remove();
-      };
-    })();
-  }, []);
-
-  const onMapPress = (e) => {
-    const { coordinate } = e.nativeEvent;
-    setMarkerLocation({
-      latitude: coordinate.latitude,
-      longitude: coordinate.longitude,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0921,
-    });
-
-    // Salvando os valores de latitude e longitude
-    setLatitude(coordinate.latitude);
-    setLongitude(coordinate.longitude);
-
-    // Corrected logging
-    console.log('Novo valor de markerLocation:', {
-      latitudeValue: coordinate.latitude,
-      longitudeValue: coordinate.longitude,
-    });
-  };
 
 
   const [tasks, setTasks] = useState([]);
@@ -98,6 +39,16 @@ export default function App() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [filter, setFilter] = useState('Todos'); // Novo estado para o filtro
+
+  const categoryColors = { // Mapeamento de categorias para cores
+    'Atribuído a Mim': '#ADFAFF',
+    'Meu Dia': '#FEFFC1',
+    'Planejado': '#BAFFC9',
+    'Importante': '#FFAFAF',
+    'Tarefas': '#EABCFF',
+    'Todos': '#DDDDDD'
+  };
 
   const handleAddTask = () => {
     if (taskTitle.trim() === '') {
@@ -111,6 +62,7 @@ export default function App() {
       time: taskTime,
       location: taskLocation,
       category: taskCategory,
+      color: categoryColors[taskCategory], // Adicione a cor aqui
     };
 
     if (isEditing) {
@@ -165,21 +117,112 @@ export default function App() {
     setTaskTime(currentTime);
   };
 
+  const handleFilter = (category) => { // Nova função para lidar com o filtro
+    setFilter(category);
+  };
+
+  const filteredTasks = tasks.filter(task => { // Filtrar as tarefas com base no filtro atual
+    if (filter === 'Todos') {
+      return true;
+    }
+    return task.category === filter;
+  });
+
+  // Ordenar as tarefas filtradas por data e hora
+  const sortedTasks = filteredTasks.sort((a, b) => {
+    const dateA = new Date(a.date.getFullYear(), a.date.getMonth(), a.date.getDate(), a.time.getHours(), a.time.getMinutes());
+    const dateB = new Date(b.date.getFullYear(), b.date.getMonth(), b.date.getDate(), b.time.getHours(), b.time.getMinutes());
+    return dateB - dateA;
+  });
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permissão de localização negada');
+        return;
+      }
+
+      let locationWatcher = await Location.watchPositionAsync({
+        accuracy: Location.Accuracy.High,
+        timeInterval: 1000,  // Atualizar a localização a cada 1 segundo
+        distanceInterval: 1  // Ou sempre que o dispositivo se mover 1 metro
+      }, (location) => {
+        setLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.0122,
+          longitudeDelta: 0.021,
+        });
+        setLatitude(location.coords.latitude); // Salvando a latitude
+        setLongitude(location.coords.longitude); // Salvando a longitude
+      });
+
+      // Não se esqueça de parar de observar a localização quando o componente for desmontado
+      return () => {
+        locationWatcher.remove();
+      };
+    })();
+  }, []);
+
+  const onMapPress = (e) => {
+    const { coordinate } = e.nativeEvent;
+    setMarkerLocation({
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0921,
+    });
+
+    // Salvando os valores de latitude e longitude
+    setLatitude(coordinate.latitude);
+    setLongitude(coordinate.longitude);
+
+    // Corrected logging
+    console.log('Novo valor de markerLocation:', {
+      latitudeValue: coordinate.latitude,
+      longitudeValue: coordinate.longitude,
+    });
+  };
+
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigation.navigate('Configurações')}>
         <Entypo name="menu" size={24} color="black" />
-
       </TouchableOpacity>
 
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Atribuído a Mim']}]} onPress={() => handleFilter('Atribuído a Mim')}>
+          <Text style={styles.buttonText}>Atribuído a Mim</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Meu Dia']}]} onPress={() => handleFilter('Meu Dia')}>
+          <Text style={styles.buttonText}>Meu Dia</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Planejado']}]} onPress={() => handleFilter('Planejado')}>
+          <Text style={styles.buttonText}>Planejado</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Importante']}]} onPress={() => handleFilter('Importante')}>
+          <Text style={styles.buttonText}>Importante</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Tarefas']}]} onPress={() => handleFilter('Tarefas')}>
+          <Text style={styles.buttonText}>Tarefas</Text>
+        </TouchableOpacity>  
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Todos']}]} onPress={() => handleFilter('Todos')}> 
+          <Text style={styles.buttonText}>Todos</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
-        data={tasks}
+        data={sortedTasks} // Use as tarefas ordenadas aqui
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
               styles.taskContainer,
-              { backgroundColor: item.category },
+              { backgroundColor: item.color }, // Use a cor aqui
               selectedTasks.includes(item.id) && styles.selectedTask,
             ]}
             onPress={() => handleEditTask(item)}
@@ -241,11 +284,12 @@ export default function App() {
               onChange={onChangeTime}
             />
           )}
-          <View>
+           <View>
             <Text style={styles.input}>Selecione a localização:</Text>
             {location && (
               <MapView
-                style={styleMap.map}
+                style={{width: '100%',
+                height: 200,}}
                 initialRegion={location}
                 onPress={onMapPress} // Adicione o manipulador de eventos onPress aqui
               >
@@ -267,39 +311,27 @@ export default function App() {
               </Text>
             )}
           </View>
-
           <Picker
             selectedValue={taskCategory}
             style={styles.input}
-            onValueChange={(itemValue) => setTaskCategory(itemValue)}
+            onValueChange={(itemValue, itemIndex) => setTaskCategory(itemValue)}
           >
-            <Picker.Item label="Atribuído a Mim" value="lightblue" />
-            <Picker.Item label="Meu Dia" value="lightyellow" />
-            <Picker.Item label="Planejado" value="lightgreen" />
-            <Picker.Item label="Importante" value="lightcoral" />
-            <Picker.Item label="Tarefas" value="plum" />
+            <Picker.Item label="Atribuído a Mim" value="Atribuído a Mim" />
+            <Picker.Item label="Meu Dia" value="Meu Dia" />
+            <Picker.Item label="Planejado" value="Planejado" />
+            <Picker.Item label="Importante" value="Importante" />
+            <Picker.Item label="Tarefas" value="Tarefas" />
           </Picker>
-
-          <View style={styles.buttonContainer}>
+          <View style={styles.buttonContainer}>         
             <Button title={isEditing ? 'Salvar' : 'Adicionar'} onPress={handleAddTask} />
             <Button title="Cancelar" onPress={() => {
               setModalVisible(false);
               setIsEditing(false);
               setSelectedTasks([]);
             }} />
-
           </View>
         </View>
       </Modal>
     </View>
   );
 }
-
-
-const styleMap = StyleSheet.create({
-
-  map: {
-    width: '100%',
-    height: 200,
-  },
-});
