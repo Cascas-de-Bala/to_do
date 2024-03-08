@@ -6,17 +6,23 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: '#fff',
       padding: 50,
+      margin: 0,
     },
     title: {
+      marginTop: 45,
+      marginBottom: 15,
       fontSize: 24,
       fontWeight: 'bold',
     },
     input: {
       height: 40,
-      borderColor: 'gray',
-      borderWidth: 1,
-      marginBottom: 20,
+      borderWidth: 0,
+      marginBottom: 10,
       paddingHorizontal: 10,
+      fontSize: 20,
+    },
+    buttonContainer: {
+      marginTop: 150,
     },
     taskContainer: {
       marginBottom: 20,
@@ -49,6 +55,32 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontSize: 32,
     },
+    // taskContainer: {
+      
+    // },
+    
+    // adicione estes estilos
+    atribuidoAMim: {
+      backgroundColor: 'lightblue',
+    },
+    meuDia: {
+      backgroundColor: 'lightyellow',
+    },
+    planejado: {
+      backgroundColor: 'lightgreen',
+    },
+    importante: {
+      backgroundColor: 'lightcoral',
+    },
+    tarefas: {
+      backgroundColor: 'plum',
+    },    
+    modalContainer:{
+      margin: 15,
+      marginTop: 0
+    }
   });
+
+  
 
   export default styles;
