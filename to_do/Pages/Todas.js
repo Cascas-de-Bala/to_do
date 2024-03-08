@@ -16,11 +16,9 @@ import styles from '../Styles/Todas.js';
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 
-
 export default function App() {
   const navigation = useNavigation();
 
-  
   const [tasks, setTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskTitle, setTaskTitle] = useState('');
@@ -32,6 +30,16 @@ export default function App() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [filter, setFilter] = useState('Todos'); // Novo estado para o filtro
+
+  const categoryColors = { // Mapeamento de categorias para cores
+    'Atribuído a Mim': '#ADFAFF',
+    'Meu Dia': '#FEFFC1',
+    'Planejado': '#BAFFC9',
+    'Importante': '#FFAFAF',
+    'Tarefas': '#EABCFF',
+    'Todos': '#DDDDDD'
+  };
 
   const handleAddTask = () => {
     if (taskTitle.trim() === '') {
@@ -45,6 +53,7 @@ export default function App() {
       time: taskTime,
       location: taskLocation,
       category: taskCategory,
+      color: categoryColors[taskCategory], // Adicione a cor aqui
     };
 
     if (isEditing) {
@@ -99,21 +108,62 @@ export default function App() {
     setTaskTime(currentTime);
   };
 
+  const handleFilter = (category) => { // Nova função para lidar com o filtro
+    setFilter(category);
+  };
+
+  const filteredTasks = tasks.filter(task => { // Filtrar as tarefas com base no filtro atual
+    if (filter === 'Todos') {
+      return true;
+    }
+    return task.category === filter;
+  });
+
+  // Ordenar as tarefas filtradas por data e hora
+  const sortedTasks = filteredTasks.sort((a, b) => {
+    const dateA = new Date(a.date.getFullYear(), a.date.getMonth(), a.date.getDate(), a.time.getHours(), a.time.getMinutes());
+    const dateB = new Date(b.date.getFullYear(), b.date.getMonth(), b.date.getDate(), b.time.getHours(), b.time.getMinutes());
+    return dateB - dateA;
+  });
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigation.navigate('Configurações')}>
         <Entypo name="menu" size={24} color="black" />
-
       </TouchableOpacity>
 
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Atribuído a Mim']}]} onPress={() => handleFilter('Atribuído a Mim')}>
+          <Text style={styles.buttonText}>Atribuído a Mim</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Meu Dia']}]} onPress={() => handleFilter('Meu Dia')}>
+          <Text style={styles.buttonText}>Meu Dia</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Planejado']}]} onPress={() => handleFilter('Planejado')}>
+          <Text style={styles.buttonText}>Planejado</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Importante']}]} onPress={() => handleFilter('Importante')}>
+          <Text style={styles.buttonText}>Importante</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Tarefas']}]} onPress={() => handleFilter('Tarefas')}>
+          <Text style={styles.buttonText}>Tarefas</Text>
+        </TouchableOpacity>  
+        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Todos']}]} onPress={() => handleFilter('Todos')}> 
+          <Text style={styles.buttonText}>Todos</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
-        data={tasks}
+        data={sortedTasks} // Use as tarefas ordenadas aqui
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
               styles.taskContainer,
-              { backgroundColor: item.category },
+              { backgroundColor: item.color }, // Use a cor aqui
               selectedTasks.includes(item.id) && styles.selectedTask,
             ]}
             onPress={() => handleEditTask(item)}
@@ -186,13 +236,13 @@ export default function App() {
             style={styles.input}
             onValueChange={(itemValue, itemIndex) => setTaskCategory(itemValue)}
           >
-            <Picker.Item label="Atribuído a Mim" value="lightblue" />
-            <Picker.Item label="Meu Dia" value="lightyellow" />
-            <Picker.Item label="Planejado" value="lightgreen" />
-            <Picker.Item label="Importante" value="lightcoral" />
-            <Picker.Item label="Tarefas" value="plum" />
+            <Picker.Item label="Atribuído a Mim" value="Atribuído a Mim" />
+            <Picker.Item label="Meu Dia" value="Meu Dia" />
+            <Picker.Item label="Planejado" value="Planejado" />
+            <Picker.Item label="Importante" value="Importante" />
+            <Picker.Item label="Tarefas" value="Tarefas" />
           </Picker>
-          <View style={styles.buttonContainer}>
+          <View style={styles.buttonContainer}>         
             <Button title={isEditing ? 'Salvar' : 'Adicionar'} onPress={handleAddTask} />
             <Button title="Cancelar" onPress={() => {
               setModalVisible(false);
