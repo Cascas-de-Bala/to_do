@@ -132,8 +132,9 @@ export default function App() {
   const sortedTasks = filteredTasks.sort((a, b) => {
     const dateA = new Date(a.date.getFullYear(), a.date.getMonth(), a.date.getDate(), a.time.getHours(), a.time.getMinutes());
     const dateB = new Date(b.date.getFullYear(), b.date.getMonth(), b.date.getDate(), b.time.getHours(), b.time.getMinutes());
-    return dateB - dateA;
+    return dateA - dateB; // Altere 'dateB - dateA' para 'dateA - dateB' para ordenar do mais próximo para o mais distante
   });
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -241,7 +242,7 @@ export default function App() {
       >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
-      {selectedTasks.length > 0 && (
+       {selectedTasks.length > 0 && (
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={handleDeleteTasks}
