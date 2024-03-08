@@ -37,29 +37,23 @@ export default function App() {
         console.log('Permissão de localização negada');
         return;
       }
-  
+
       let locationWatcher = await Location.watchPositionAsync({
         accuracy: Location.Accuracy.High,
-        timeInterval: 1000,
-        distanceInterval: 1
+        timeInterval: 1000,  // Atualizar a localização a cada 1 segundo
+        distanceInterval: 1  // Ou sempre que o dispositivo se mover 1 metro
       }, (location) => {
         setLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          latitudeDelta: 0.0122,
-          longitudeDelta: 0.021,
-        });
-        setLatitude(location.coords.latitude);
-        setLongitude(location.coords.longitude);
-        // Definindo a localização atual como o valor inicial do marcador
-        setMarkerLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
           latitudeDelta: 0.0922,
-          longitudeDelta: 0.0921,
+          longitudeDelta: 0.0421,
         });
+        setLatitude(location.coords.latitude); // Salvando a latitude
+        setLongitude(location.coords.longitude); // Salvando a longitude
       });
-  
+
+      // Não se esqueça de parar de observar a localização quando o componente for desmontado
       return () => {
         locationWatcher.remove();
       };
@@ -72,7 +66,7 @@ export default function App() {
       latitude: coordinate.latitude,
       longitude: coordinate.longitude,
       latitudeDelta: 0.0922,
-      longitudeDelta: 0.0921,
+      longitudeDelta: 0.0421,
     });
 
     // Salvando os valores de latitude e longitude
