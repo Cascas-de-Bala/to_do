@@ -21,9 +21,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   buttonContainer: {
-    marginTop: 150,
+    marginTop: 170,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
   taskContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',

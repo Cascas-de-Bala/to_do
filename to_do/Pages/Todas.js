@@ -9,6 +9,7 @@ import {
   Button,
   Platform,
   Alert,
+  Switch,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -19,14 +20,14 @@ import { getLatitude } from '../Components/mapa.js';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
+
 export default function App() {
   const navigation = useNavigation();
 
   const [location, setLocation] = useState(null);
   const [markerLocation, setMarkerLocation] = useState(null);
   const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null); // Estado adicionado para armazenar os valores de latitude e longitude
-
+  const [longitude, setLongitude] = useState(null);
 
   const [tasks, setTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
@@ -39,15 +40,16 @@ export default function App() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [filter, setFilter] = useState('Todos'); // Novo estado para o filtro
+  const [filter, setFilter] = useState('Pendentes'); // Alterado de 'Todos' para 'Pendentes'
 
-  const categoryColors = { // Mapeamento de categorias para cores
+  const categoryColors = {
     'Atribuído a Mim': '#ADFAFF',
     'Meu Dia': '#FEFFC1',
     'Planejado': '#BAFFC9',
     'Importante': '#FFAFAF',
     'Tarefas': '#EABCFF',
-    'Todos': '#DDDDDD'
+    'Pendentes': '#DDDDDD', // Alterado de 'Todos' para 'Pendentes'
+    'Concluído': '#D3D3D3'
   };
 
   const handleAddTask = () => {
@@ -62,7 +64,8 @@ export default function App() {
       time: taskTime,
       location: taskLocation,
       category: taskCategory,
-      color: categoryColors[taskCategory], // Adicione a cor aqui
+      color: categoryColors[taskCategory],
+      completed: false,
     };
 
     if (isEditing) {
@@ -117,22 +120,23 @@ export default function App() {
     setTaskTime(currentTime);
   };
 
-  const handleFilter = (category) => { // Nova função para lidar com o filtro
+  const handleFilter = (category) => {
     setFilter(category);
   };
 
-  const filteredTasks = tasks.filter(task => { // Filtrar as tarefas com base no filtro atual
-    if (filter === 'Todos') {
-      return true;
+  const filteredTasks = tasks.filter(task => {
+    if (filter === 'Pendentes') {
+      return !task.completed;
+    } else if (filter === 'Concluído') {
+      return task.completed;
     }
-    return task.category === filter;
+    return task.category === filter && !task.completed; // Adicionado !task.completed para excluir tarefas concluídas
   });
 
-  // Ordenar as tarefas filtradas por data e hora
   const sortedTasks = filteredTasks.sort((a, b) => {
     const dateA = new Date(a.date.getFullYear(), a.date.getMonth(), a.date.getDate(), a.time.getHours(), a.time.getMinutes());
     const dateB = new Date(b.date.getFullYear(), b.date.getMonth(), b.date.getDate(), b.time.getHours(), b.time.getMinutes());
-    return dateA - dateB; // Altere 'dateB - dateA' para 'dateA - dateB' para ordenar do mais próximo para o mais distante
+    return dateA - dateB;
   });
 
   useEffect(() => {
@@ -145,8 +149,8 @@ export default function App() {
 
       let locationWatcher = await Location.watchPositionAsync({
         accuracy: Location.Accuracy.High,
-        timeInterval: 1000,  // Atualizar a localização a cada 1 segundo
-        distanceInterval: 1  // Ou sempre que o dispositivo se mover 1 metro
+        timeInterval: 1000,
+        distanceInterval: 1
       }, (location) => {
         setLocation({
           latitude: location.coords.latitude,
@@ -154,11 +158,10 @@ export default function App() {
           latitudeDelta: 0.0122,
           longitudeDelta: 0.021,
         });
-        setLatitude(location.coords.latitude); // Salvando a latitude
-        setLongitude(location.coords.longitude); // Salvando a longitude
+        setLatitude(location.coords.latitude);
+        setLongitude(location.coords.longitude);
       });
 
-      // Não se esqueça de parar de observar a localização quando o componente for desmontado
       return () => {
         locationWatcher.remove();
       };
@@ -174,17 +177,14 @@ export default function App() {
       longitudeDelta: 0.0921,
     });
 
-    // Salvando os valores de latitude e longitude
     setLatitude(coordinate.latitude);
     setLongitude(coordinate.longitude);
 
-    // Corrected logging
     console.log('Novo valor de markerLocation:', {
       latitudeValue: coordinate.latitude,
       longitudeValue: coordinate.longitude,
     });
   };
-
 
   return (
     <View style={styles.container}>
@@ -193,56 +193,69 @@ export default function App() {
       </TouchableOpacity>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Atribuído a Mim']}]} onPress={() => handleFilter('Atribuído a Mim')}>
+        <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Atribuído a Mim'] }]} onPress={() => handleFilter('Atribuído a Mim')}>
           <Text style={styles.buttonText}>Atribuído a Mim</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Meu Dia']}]} onPress={() => handleFilter('Meu Dia')}>
+        <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Meu Dia'] }]} onPress={() => handleFilter('Meu Dia')}>
           <Text style={styles.buttonText}>Meu Dia</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Planejado']}]} onPress={() => handleFilter('Planejado')}>
+        <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Planejado'] }]} onPress={() => handleFilter('Planejado')}>
           <Text style={styles.buttonText}>Planejado</Text>
         </TouchableOpacity>
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Importante']}]} onPress={() => handleFilter('Importante')}>
+        <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Importante'] }]} onPress={() => handleFilter('Importante')}>
           <Text style={styles.buttonText}>Importante</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Tarefas']}]} onPress={() => handleFilter('Tarefas')}>
+        <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Tarefas'] }]} onPress={() => handleFilter('Tarefas')}>
           <Text style={styles.buttonText}>Tarefas</Text>
-        </TouchableOpacity>  
-        <TouchableOpacity style={[styles.button_cat, {backgroundColor: categoryColors['Todos']}]} onPress={() => handleFilter('Todos')}> 
-          <Text style={styles.buttonText}>Todos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Pendentes'] }]} onPress={() => handleFilter('Pendentes')}>
+          <Text style={styles.buttonText}>Pendentes</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+        <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Concluído'] }]} onPress={() => handleFilter('Concluído')}>
+          <Text style={styles.buttonText}>Concluído</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={sortedTasks} // Use as tarefas ordenadas aqui
+        data={sortedTasks}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.taskContainer,
-              { backgroundColor: item.color }, // Use a cor aqui
-              selectedTasks.includes(item.id) && styles.selectedTask,
-            ]}
-            onPress={() => handleEditTask(item)}
-            onLongPress={() => handleSelectTask(item.id)}
-          >
-            <Text style={styles.taskTitle}>{item.title}</Text>
-            <Text style={styles.taskDate}>{item.date.toLocaleDateString()}</Text>
-            <Text style={styles.taskTime}>{item.time.toLocaleTimeString()}</Text>
-            <Text style={styles.taskLocation}>{item.location}</Text>
-          </TouchableOpacity>
+          <View style={styles.taskContainer}>
+            <TouchableOpacity
+              style={[
+                { backgroundColor: item.color },
+                selectedTasks.includes(item.id) && styles.selectedTask,
+              ]}
+              onPress={() => handleEditTask(item)}
+              onLongPress={() => handleSelectTask(item.id)}
+            >
+              <Text style={styles.taskTitle}>{item.title}</Text>
+              <Text style={styles.taskDate}>{item.date.toLocaleDateString()}</Text>
+              <Text style={styles.taskTime}>{item.time.toLocaleTimeString()}</Text>
+              <Text style={styles.taskLocation}>{item.location}</Text>
+            </TouchableOpacity>
+            <Switch               value={item.completed}
+              onValueChange={(newValue) => {
+                setTasks(tasks.map(task => task.id === item.id ? {...task, completed: newValue} : task));
+              }}
+            />
+          </View>
         )}
       />
+
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
       >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
-       {selectedTasks.length > 0 && (
+      {selectedTasks.length > 0 && (
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={handleDeleteTasks}
@@ -285,14 +298,17 @@ export default function App() {
               onChange={onChangeTime}
             />
           )}
-           <View>
+          <View>
+              
             <Text style={styles.input}>Selecione a localização:</Text>
             {location && (
               <MapView
-                style={{width: '100%',
-                height: 200,}}
+                style={{
+                  width: '100%',
+                  height: 200,
+                }}
                 initialRegion={location}
-                onPress={onMapPress} // Adicione o manipulador de eventos onPress aqui
+                onPress={onMapPress}
               >
                 {markerLocation && (
                   <Marker
@@ -302,15 +318,8 @@ export default function App() {
                 )}
               </MapView>
             )}
-            {markerLocation ? (
-              <Text style={styles.input}>
-                Latitude: {latitude}, Longitude: {longitude}
-              </Text>
-            ) : (
-              <Text style={styles.input}>
-                Selecione uma localização no mapa.
-              </Text>
-            )}
+           
+            
           </View>
           <Picker
             selectedValue={taskCategory}
@@ -323,7 +332,7 @@ export default function App() {
             <Picker.Item label="Importante" value="Importante" />
             <Picker.Item label="Tarefas" value="Tarefas" />
           </Picker>
-          <View style={styles.buttonContainer}>         
+          <View style={styles.buttonContainer}>
             <Button title={isEditing ? 'Salvar' : 'Adicionar'} onPress={handleAddTask} />
             <Button title="Cancelar" onPress={() => {
               setModalVisible(false);
