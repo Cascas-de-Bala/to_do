@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   Switch,
+  Image
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -19,6 +20,7 @@ import { useNavigation } from "@react-navigation/native";
 import { getLatitude } from '../Components/mapa.js';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import * as ImagePicker from 'expo-image-picker';
 
 
 export default function App() {
@@ -41,6 +43,7 @@ export default function App() {
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [filter, setFilter] = useState('Pendentes'); // Alterado de 'Todos' para 'Pendentes'
+  const [image, setImage] = useState(null);
 
   const categoryColors = {
     'Atribuído a Mim': '#ADFAFF',
@@ -66,6 +69,7 @@ export default function App() {
       category: taskCategory,
       color: categoryColors[taskCategory],
       completed: false,
+      image: image
     };
 
     if (isEditing) {
@@ -82,6 +86,7 @@ export default function App() {
     setTaskLocation('');
     setTaskCategory('');
     setModalVisible(false);
+    setImage(null);
   };
 
   const handleSelectTask = (id) => {
@@ -101,6 +106,7 @@ export default function App() {
     setSelectedTasks([task.id]);
     setIsEditing(true);
     setModalVisible(true);
+    setImage(task.image);
   };
 
   const handleDeleteTasks = () => {
@@ -186,6 +192,25 @@ export default function App() {
     });
   };
 
+
+  //image picker
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigation.navigate('Configurações')}>
@@ -240,9 +265,9 @@ export default function App() {
               <Text style={styles.taskTime}>{item.time.toLocaleTimeString()}</Text>
               <Text style={styles.taskLocation}>{item.location}</Text>
             </TouchableOpacity>
-            <Switch               value={item.completed}
+            <Switch value={item.completed}
               onValueChange={(newValue) => {
-                setTasks(tasks.map(task => task.id === item.id ? {...task, completed: newValue} : task));
+                setTasks(tasks.map(task => task.id === item.id ? { ...task, completed: newValue } : task));
               }}
             />
           </View>
@@ -272,6 +297,15 @@ export default function App() {
             value={taskTitle}
             onChangeText={setTaskTitle}
           />
+          <View>
+            {image && (
+              <Image style={styles.imgNovoContato} source={{ uri: image || setImage }} />
+            )}
+            <TouchableOpacity onPress={pickImage}>
+              <Text style={styles.inputImage}>Selecionar Imagem</Text>
+            </TouchableOpacity>
+            <Image source={{ uri: image }} style={{ width: 50, height: 50 }} />
+          </View>
           <TouchableOpacity onPress={() => setDatePickerVisible(true)}>
             <Text style={styles.input}>{taskDate.toLocaleDateString()}</Text>
           </TouchableOpacity>
@@ -299,7 +333,7 @@ export default function App() {
             />
           )}
           <View>
-              
+
             <Text style={styles.input}>Selecione a localização:</Text>
             {location && (
               <MapView
@@ -318,8 +352,8 @@ export default function App() {
                 )}
               </MapView>
             )}
-           
-            
+
+
           </View>
           <Picker
             selectedValue={taskCategory}
