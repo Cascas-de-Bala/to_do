@@ -19,19 +19,27 @@
       "bundleIdentifier": "com.example.to_do",
       "config": {
         "googleMapsApiKey": "AIzaSyC0EqK6_X5dXw-wBe7e9nObZkjeCoRULV0"
-      }},
-      "android": {
-        "adaptiveIcon": {
-          "foregroundImage": "./assets/adaptive-icon.png",
-          "backgroundColor": "#ffffff"
-        },
-        "package": "com.example.to_do",
-        "config": {
-          "googleMaps": {
-            "apiKey": "SUA_CHAVE_DA_API"
-          }}},
-          "web": {
-            "favicon": "./assets/favicon.png"
-          }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.example.to_do",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyC0EqK6_X5dXw-wBe7e9nObZkjeCoRULV0"
         }
       }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4c68cce9-dc1d-4989-b3b7-1b7a0cc47b4a"
+      }
+    }
+  }
+}

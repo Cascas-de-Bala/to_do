@@ -13,6 +13,7 @@ import {
   Image,
   StyleSheet
 } from 'react-native';
+import Mensage from '../Components/message.js'
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import stylesY from '../Styles/estilos.js';
@@ -23,7 +24,9 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
 import { ThemeContext } from '../Styles/temaContext.js'; // Importe o ThemeContext
-
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
 export default function App() {
 
@@ -295,9 +298,10 @@ export default function App() {
       {selectedTasks.length > 0 && (
         <TouchableOpacity
           style={styles.deleteButton}
-          onPress={handleDeleteTasks}
+          onPress={{handleDeleteTasks}} 
         >
           <Text style={[styles.deleteButtonText, { color: configTextColor }]}>Deletar selecionados</Text>
+          <Mensage title={'Deletado'} body={'corpo da mensagem'}/>
         </TouchableOpacity>
       )}
 
@@ -432,3 +436,10 @@ export default function App() {
 
 
 }
+
+
+
+
+
+
+
