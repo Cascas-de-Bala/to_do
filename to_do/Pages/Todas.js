@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Text,
   View,
@@ -10,21 +10,29 @@ import {
   Platform,
   Alert,
   Switch,
-  Image
+  Image,
+  StyleSheet
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import styles from '../Styles/Todas.js';
+import stylesY from '../Styles/estilos.js';
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 import { getLatitude } from '../Components/mapa.js';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
+import { ThemeContext } from '../Styles/temaContext.js'; // Importe o ThemeContext
 
 
 export default function App() {
+
+
+
+
+  const { theme, toggleTheme, configTextColor } = useContext(ThemeContext); // Acesse o tema atual
   const navigation = useNavigation();
+  const styles = stylesY(theme);
 
   const [location, setLocation] = useState(null);
   const [markerLocation, setMarkerLocation] = useState(null);
@@ -46,13 +54,13 @@ export default function App() {
   const [image, setImage] = useState(null);
 
   const categoryColors = {
-    'Atribuído a Mim': '#ADFAFF',
-    'Meu Dia': '#FEFFC1',
-    'Planejado': '#BAFFC9',
-    'Importante': '#FFAFAF',
-    'Tarefas': '#EABCFF',
+    'Atribuído a Mim': '#40f3ff',
+    'Meu Dia': '#f8fa7a',
+    'Planejado': '#66ff87',
+    'Importante': '#ff7575',
+    'Tarefas': '#d780ff',
     'Pendentes': '#DDDDDD', // Alterado de 'Todos' para 'Pendentes'
-    'Concluído': '#D3D3D3'
+    'Concluído': '#ccc'
   };
 
   const handleAddTask = () => {
@@ -212,12 +220,12 @@ export default function App() {
 
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme === 'light' ? '#fff' : '#000' }]}>
       <TouchableOpacity onPress={() => navigation.navigate('Configurações')}>
-        <Entypo name="menu" size={24} color="black" />
+        <Entypo name="menu" size={24} color={theme === 'light' ? 'black' : 'white'} />
       </TouchableOpacity>
 
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, marginTop: 20 }}>
         <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Atribuído a Mim'] }]} onPress={() => handleFilter('Atribuído a Mim')}>
           <Text style={styles.buttonText}>Atribuído a Mim</Text>
         </TouchableOpacity>
@@ -251,7 +259,9 @@ export default function App() {
         data={sortedTasks}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.taskContainer}>
+          <View style={[
+            { backgroundColor: item.color }, styles.taskContainer
+          ]}>
             <TouchableOpacity
               style={[
                 { backgroundColor: item.color },
@@ -263,7 +273,7 @@ export default function App() {
               <Text style={styles.taskTitle}>{item.title}</Text>
               <Text style={styles.taskDate}>{item.date.toLocaleDateString()}</Text>
               <Text style={styles.taskTime}>{item.time.toLocaleTimeString()}</Text>
-              <Text style={styles.taskLocation}>{item.location}</Text>
+              {/* <Text style={styles.taskLocation}>{item.location}</Text> */}
             </TouchableOpacity>
             <Switch value={item.completed}
               onValueChange={(newValue) => {
@@ -285,7 +295,7 @@ export default function App() {
           style={styles.deleteButton}
           onPress={handleDeleteTasks}
         >
-          <Text style={styles.deleteButtonText}>Deletar selecionados</Text>
+          <Text style={[styles.deleteButtonText, { color: configTextColor}]}>Deletar selecionados</Text>
         </TouchableOpacity>
       )}
       <Modal visible={modalVisible} animationType="slide">
@@ -378,4 +388,8 @@ export default function App() {
       </Modal>
     </View>
   );
+
+
+
+
 }
