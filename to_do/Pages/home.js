@@ -47,6 +47,7 @@ export default function App() {
   const [taskLocation, setTaskLocation] = useState('');
   const [taskCategory, setTaskCategory] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [openModalImg, setopenModalImg] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -94,6 +95,7 @@ export default function App() {
     setTaskLocation('');
     setTaskCategory('');
     setModalVisible(false);
+    setopenModalImg(false);
     setImage(null);
   };
 
@@ -295,9 +297,11 @@ export default function App() {
           style={styles.deleteButton}
           onPress={handleDeleteTasks}
         >
-          <Text style={[styles.deleteButtonText, { color: configTextColor}]}>Deletar selecionados</Text>
+          <Text style={[styles.deleteButtonText, { color: configTextColor }]}>Deletar selecionados</Text>
         </TouchableOpacity>
       )}
+
+
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <Text style={styles.title}>{isEditing ? 'Editar Lembrete' : 'Novo Lembrete'}</Text>
@@ -307,18 +311,28 @@ export default function App() {
             value={taskTitle}
             onChangeText={setTaskTitle}
           />
-          <View>
+
+
+          <TouchableOpacity onPress={() => setopenModalImg(true)}>
             {image && (
-              <Image style={styles.imgNovoContato} source={{ uri: image || setImage }} />
+              <View onPress={() => setopenModalImg(true)}>
+                <Image style={styles.imgNovoContato} source={{ uri: image || setImage }} />
+              </View>
             )}
+
             <TouchableOpacity onPress={pickImage}>
               <Text style={styles.inputImage}>Selecionar Imagem</Text>
             </TouchableOpacity>
+
             <Image source={{ uri: image }} style={{ width: 50, height: 50 }} />
-          </View>
+          </TouchableOpacity>
+
+
           <TouchableOpacity onPress={() => setDatePickerVisible(true)}>
             <Text style={styles.input}>{taskDate.toLocaleDateString()}</Text>
           </TouchableOpacity>
+
+
           {datePickerVisible && (
             <DateTimePicker
               testID="datePicker"
@@ -386,6 +400,31 @@ export default function App() {
           </View>
         </View>
       </Modal>
+      <Modal visible={openModalImg} animationType="slide" style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }} >
+        <View style={{
+          width: '100%', // ajuste conforme necessário
+          height: '100%',
+          alignSelf: 'center', // adicionado para centralizar a imagem
+          marginVertical: 100
+        }} >
+
+        <Text style={{textAlign: 'center'}}>hehe</Text>
+        <Image source={{ uri: image }} style={{
+          width: 150, // ajuste conforme necessário
+          height: 150,
+          alignSelf: 'center', // adicionado para centralizar a imagem
+        }} />
+        <TouchableOpacity onPress={() => setopenModalImg(false)} >
+          <Text style={{ fontSize: 30 , textAlign: 'center'}}>Ok</Text>
+        </TouchableOpacity>
+        </View>
+
+      </Modal>
+
     </View>
   );
 

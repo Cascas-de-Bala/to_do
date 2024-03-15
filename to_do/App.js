@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { ThemeProvider, ThemeContext } from './Styles/temaContext';
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Home from './Pages/Todas.js'; // Importe suas telas
+import Home from './Pages/home.js'; // Importe suas telas
 import Config from './Pages/config.js'; // Importe suas telas
 
 export default function App() {
