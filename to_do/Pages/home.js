@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
   Text,
   View,
@@ -13,7 +13,7 @@ import {
   Image,
   StyleSheet
 } from 'react-native';
-import Mensage from '../Components/message.js'
+// import Mensage from '../Components/message.js'
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import stylesY from '../Styles/estilos.js';
@@ -30,6 +30,92 @@ import Constants from 'expo-constants';
 
 export default function App() {
 
+  //mensagem
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+
+
+  // Can use this function below or use Expo's Push Notification Tool from: https://expo.dev/notifications
+  async function sendPushNotification(expoPushToken) {
+    const message = {
+      to: expoPushToken,
+      sound: 'default',
+      title: taskTitle,
+      body: taskCategory,
+      data: { someData: 'goes here' },
+    };
+
+    await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(message),
+    });
+  }
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+      token = await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig.extra.eas.projectId,
+      });
+      console.log(token);
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+
+    return token.data;
+  }
+
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
 
 
@@ -298,10 +384,9 @@ export default function App() {
       {selectedTasks.length > 0 && (
         <TouchableOpacity
           style={styles.deleteButton}
-          onPress={{handleDeleteTasks}} 
+          onPress={{ handleDeleteTasks }}
         >
           <Text style={[styles.deleteButtonText, { color: configTextColor }]}>Deletar selecionados</Text>
-          <Mensage title={'Deletado'} body={'corpo da mensagem'}/>
         </TouchableOpacity>
       )}
 
@@ -395,7 +480,14 @@ export default function App() {
             <Picker.Item label="Tarefas" value="Tarefas" />
           </Picker>
           <View style={styles.buttonContainer}>
-            <Button title={isEditing ? 'Salvar' : 'Adicionar'} onPress={handleAddTask} />
+
+            <Button
+              title={isEditing ? 'Salvar' : 'Adicionar'}
+              onPress={async () => {
+                handleAddTask();
+                await sendPushNotification(expoPushToken);
+              }}
+            />
             <Button title="Cancelar" onPress={() => {
               setModalVisible(false);
               setIsEditing(false);
@@ -416,30 +508,19 @@ export default function App() {
           marginVertical: 100
         }} >
 
-        <Text style={{textAlign: 'center'}}>hehe</Text>
-        <Image source={{ uri: image }} style={{
-          width: 150, // ajuste conforme necessário
-          height: 150,
-          alignSelf: 'center', // adicionado para centralizar a imagem
-        }} />
-        <TouchableOpacity onPress={() => setopenModalImg(false)} >
-          <Text style={{ fontSize: 30 , textAlign: 'center'}}>Ok</Text>
-        </TouchableOpacity>
+          <Text style={{ textAlign: 'center' }}>hehe</Text>
+          <Image source={{ uri: image }} style={{
+            width: 150, // ajuste conforme necessário
+            height: 150,
+            alignSelf: 'center', // adicionado para centralizar a imagem
+          }} />
+          <TouchableOpacity onPress={() => setopenModalImg(false)} >
+            <Text style={{ fontSize: 30, textAlign: 'center' }}>Ok</Text>
+          </TouchableOpacity>
         </View>
 
       </Modal>
 
     </View>
   );
-
-
-
-
 }
-
-
-
-
-
-
-
