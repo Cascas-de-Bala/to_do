@@ -20,7 +20,7 @@ export default function Header() {
           <Text style={[styles.texto, {color: configTextColor}]}>Mudar Tema</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => BackHandler.exitApp()}>
-          <Text style={styles.texto}>Fechar App</Text>
+          <Text style={[styles.texto, {color: configTextColor}]}>Fechar App</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={[styles.texto, {color: configTextColor}]}>Voltar</Text>

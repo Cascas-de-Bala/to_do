@@ -12,25 +12,25 @@ import {
   Switch,
   Image,
   StyleSheet
-} from 'react-native';
+} from 'react-native'; //import de elementos do proprio react
 // import Mensage from '../Components/message.js'
-import { Picker } from '@react-native-picker/picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import stylesY from '../Styles/estilos.js';
-import { Entypo } from '@expo/vector-icons';
-import { useNavigation } from "@react-navigation/native";
-import { getLatitude } from '../Components/mapa.js';
-import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
-import * as ImagePicker from 'expo-image-picker';
+import { Picker } from '@react-native-picker/picker'; //usado para fazer lista de items
+import DateTimePicker from '@react-native-community/datetimepicker'; //seletor de data
+import stylesY from '../Styles/estilos.js'; //estilos da pagina
+import { Entypo } from '@expo/vector-icons'; //pacote de icones
+import { useNavigation } from "@react-navigation/native"; //navegacao entre paginas
+import { getLatitude } from '../Components/mapa.js'; // latitude do dispositivo
+import MapView, { Marker } from 'react-native-maps'; // marcador do mapa
+import * as Location from 'expo-location'; // pacote para a localização
+import * as ImagePicker from 'expo-image-picker'; //seletor de imagem
 import { ThemeContext } from '../Styles/temaContext.js'; // Importe o ThemeContext
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
-import Constants from 'expo-constants';
+import * as Device from 'expo-device'; //pega informações do dispositivo
+import * as Notifications from 'expo-notifications'; //notificações pop up
+import Constants from 'expo-constants'; //constantes para o projeto
 
 export default function App() {
 
-  //mensagem
+  //mensagem codigo da propria documentação
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -41,13 +41,14 @@ export default function App() {
 
 
   // Can use this function below or use Expo's Push Notification Tool from: https://expo.dev/notifications
+  // aqui são definidas as informações do pop up
   async function sendPushNotification(expoPushToken) {
     const message = {
       to: expoPushToken,
-      sound: 'default',
+      sound: require('../assets'),
       title: taskTitle,
       body: taskCategory,
-      data: { someData: 'goes here' },
+      data: { someData: 'tarefa criada com sucesso'},
     };
 
     await fetch('https://exp.host/--/api/v2/push/send', {
@@ -118,31 +119,32 @@ export default function App() {
   }, []);
 
 
-
+  //constantes do projeto
   const { theme, toggleTheme, configTextColor } = useContext(ThemeContext); // Acesse o tema atual
-  const navigation = useNavigation();
+  const navigation = useNavigation(); //navegação
   const styles = stylesY(theme);
 
-  const [location, setLocation] = useState(null);
-  const [markerLocation, setMarkerLocation] = useState(null);
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
+  const [location, setLocation] = useState(null); //armazena a localização
+  const [markerLocation, setMarkerLocation] = useState(null); //armazena o marcador
+  const [latitude, setLatitude] = useState(null); //armazena o latitude
+  const [longitude, setLongitude] = useState(null);//armazena o longitude
 
-  const [tasks, setTasks] = useState([]);
-  const [selectedTasks, setSelectedTasks] = useState([]);
-  const [taskTitle, setTaskTitle] = useState('');
-  const [taskDate, setTaskDate] = useState(new Date());
-  const [taskTime, setTaskTime] = useState(new Date());
-  const [taskLocation, setTaskLocation] = useState('');
-  const [taskCategory, setTaskCategory] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [openModalImg, setopenModalImg] = useState(false);
+  const [tasks, setTasks] = useState([]); //armazena as tarefas
+  const [selectedTasks, setSelectedTasks] = useState([]); //armazena quais tarefas selecionadas
+  const [taskTitle, setTaskTitle] = useState(''); //armazena o titulo das tarefas
+  const [taskDate, setTaskDate] = useState(new Date()); //armazena a data das tarefas
+  const [taskTime, setTaskTime] = useState(new Date()); //armazena a hora das tarefas
+  const [taskLocation, setTaskLocation] = useState(''); //armazena a localização das tarefas
+  const [taskCategory, setTaskCategory] = useState(''); //armazena a categoria
+  const [modalVisible, setModalVisible] = useState(false); //modal visivel ou não
+  const [openModalImg, setopenModalImg] = useState(false); //modal 2
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [filter, setFilter] = useState('Pendentes'); // Alterado de 'Todos' para 'Pendentes'
   const [image, setImage] = useState(null);
 
+  //cores das categorias que existem
   const categoryColors = {
     'Atribuído a Mim': '#40f3ff',
     'Meu Dia': '#f8fa7a',
@@ -158,6 +160,7 @@ export default function App() {
       return;
     }
 
+    //abaixo é setado a tarefa com os devidos dados
     const newTask = {
       id: Date.now(),
       title: taskTitle,
@@ -224,7 +227,7 @@ export default function App() {
     setTimePickerVisible(Platform.OS === 'ios');
     setTaskTime(currentTime);
   };
-
+  //filtro das categorias
   const handleFilter = (category) => {
     setFilter(category);
   };
@@ -237,13 +240,15 @@ export default function App() {
     }
     return task.category === filter && !task.completed; // Adicionado !task.completed para excluir tarefas concluídas
   });
-
+  //ordem de data
   const sortedTasks = filteredTasks.sort((a, b) => {
     const dateA = new Date(a.date.getFullYear(), a.date.getMonth(), a.date.getDate(), a.time.getHours(), a.time.getMinutes());
     const dateB = new Date(b.date.getFullYear(), b.date.getMonth(), b.date.getDate(), b.time.getHours(), b.time.getMinutes());
     return dateA - dateB;
   });
 
+
+  //permissao de localização
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -273,6 +278,7 @@ export default function App() {
     })();
   }, []);
 
+  //marcador
   const onMapPress = (e) => {
     const { coordinate } = e.nativeEvent;
     setMarkerLocation({
@@ -309,7 +315,7 @@ export default function App() {
     }
   };
 
-
+  //parte visual do codigo
   return (
     <View style={[styles.container, { backgroundColor: theme === 'light' ? '#fff' : '#000' }]}>
       <TouchableOpacity onPress={() => navigation.navigate('Configurações')}>
@@ -345,7 +351,7 @@ export default function App() {
           <Text style={styles.buttonText}>Concluído</Text>
         </TouchableOpacity>
       </View>
-
+      {/* lista com as categorias */}
       <FlatList
         data={sortedTasks}
         keyExtractor={(item) => item.id.toString()}
@@ -381,16 +387,16 @@ export default function App() {
       >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
+
       {selectedTasks.length > 0 && (
         <TouchableOpacity
           style={styles.deleteButton}
-          onPress={{ handleDeleteTasks }}
+          onPress={handleDeleteTasks}
         >
-          <Text style={[styles.deleteButtonText, { color: configTextColor }]}>Deletar selecionados</Text>
+          <Text style={[styles.deleteButtonText, { color: configTextColor}]}>Deletar selecionados</Text>
         </TouchableOpacity>
       )}
-
-
+      {/* modal de criação da tarefa */}
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <Text style={styles.title}>{isEditing ? 'Editar Lembrete' : 'Novo Lembrete'}</Text>
@@ -468,6 +474,7 @@ export default function App() {
 
 
           </View>
+
           <Picker
             selectedValue={taskCategory}
             style={styles.input}
@@ -496,6 +503,8 @@ export default function App() {
           </View>
         </View>
       </Modal>
+
+      {/* modal visualização tem tela cheia da imagem */}
       <Modal visible={openModalImg} animationType="slide" style={{
         flex: 1,
         justifyContent: 'center',
