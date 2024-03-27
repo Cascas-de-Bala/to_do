@@ -1,5 +1,5 @@
 // Config.js
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useContext } from 'react';
@@ -13,6 +13,7 @@ export default function Header() {
   return (
     <View style={[styles.container, {backgroundColor: theme === 'light' ? '#fff' : '#000'}]}>
       <View>
+        <Image source={require('../assets/logo-app.jpeg')} style={{width: 80, height: 80, borderRadius: 10}}/>
         {/* <TouchableOpacity onPress={() => navigation.navigate('Config')}>
           <Text style={[styles.texto, {color: configTextColor}]}>Apagar Contatos</Text>
         </TouchableOpacity> */}

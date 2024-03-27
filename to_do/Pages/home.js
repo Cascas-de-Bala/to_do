@@ -45,7 +45,7 @@ export default function App() {
   async function sendPushNotification(expoPushToken) {
     const message = {
       to: expoPushToken,
-      sound: require('../assets'),
+      sound: 'default',
       title: taskTitle,
       body: taskCategory,
       data: { someData: 'tarefa criada com sucesso'},
