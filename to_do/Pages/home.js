@@ -216,17 +216,17 @@ export default function App() {
     setSelectedTasks([]);
   };
 
-  const onChangeDate = (event, selectedDate) => {
-    const currentDate = selectedDate || taskDate;
-    setDatePickerVisible(Platform.OS === 'ios');
-    setTaskDate(currentDate);
-  };
+    const onChangeDate = (event, selectedDate) => {
+      const currentDate = selectedDate || taskDate;
+      setDatePickerVisible(Platform.OS === 'ios');
+      setTaskDate(currentDate);
+    };
 
-  const onChangeTime = (event, selectedTime) => {
-    const currentTime = selectedTime || taskTime;
-    setTimePickerVisible(Platform.OS === 'ios');
-    setTaskTime(currentTime);
-  };
+    const onChangeTime = (event, selectedTime) => {
+      const currentTime = selectedTime || taskTime;
+      setTimePickerVisible(Platform.OS === 'ios');
+      setTaskTime(currentTime);
+    };
   //filtro das categorias
   const handleFilter = (category) => {
     setFilter(category);
