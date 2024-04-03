@@ -4,10 +4,10 @@
     "slug": "to_do",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo-app.jpeg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/logo-app.jpeg",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -15,26 +15,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.example.to_do",
-      "config": {
-        "googleMapsApiKey": "AIzaSyC0EqK6_X5dXw-wBe7e9nObZkjeCoRULV0"
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo-app.jpeg",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.example.to_do",
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyC0EqK6_X5dXw-wBe7e9nObZkjeCoRULV0"
-        }
-      }
+      "package": "com.mayck.to_do"
     },
     "web": {
-      "favicon": "./assets/logo-app.jpeg"
+      "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
