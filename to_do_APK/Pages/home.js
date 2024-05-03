@@ -322,6 +322,11 @@ export default function App() {
         <Entypo name="menu" size={24} color={theme === 'light' ? 'black' : 'white'} />
       </TouchableOpacity>
 
+      {/* <TouchableOpacity onPress={navigation.navigate('Login')}>
+        <Text>Login</Text>
+        
+      </TouchableOpacity> */}
+
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, marginTop: 20 }}>
         <TouchableOpacity style={[styles.button_cat, { backgroundColor: categoryColors['Atribuído a Mim'] }]} onPress={() => handleFilter('Atribuído a Mim')}>
           <Text style={styles.buttonText}>Atribuído a Mim</Text>
@@ -393,7 +398,7 @@ export default function App() {
           style={styles.deleteButton}
           onPress={handleDeleteTasks}
         >
-          <Text style={[styles.deleteButtonText, { color: configTextColor}]}>Deletar selecionados</Text>
+          <Text style={[styles.deleteButtonText, { color: configTextColor }]}>Deletar selecionados</Text>
         </TouchableOpacity>
       )}
       {/* modal de criação da tarefa */}
@@ -431,16 +436,19 @@ export default function App() {
           {datePickerVisible && (
             <DateTimePicker
               testID="datePicker"
-              value={taskDate}
               mode={'date'}
+              value={taskDate}
               is24Hour={true}
               display="default"
               onChange={onChangeDate}
+              minimumDate={new Date()}
+              maximumDate={new Date(2100, 0, 1)}
             />
           )}
           <TouchableOpacity onPress={() => setTimePickerVisible(true)}>
             <Text style={styles.input}>{taskTime.toLocaleTimeString()}</Text>
           </TouchableOpacity>
+
           {timePickerVisible && (
             <DateTimePicker
               testID="timePicker"
@@ -451,6 +459,8 @@ export default function App() {
               onChange={onChangeTime}
             />
           )}
+
+
           <View>
 
             <Text style={styles.input}>Selecione a localização:</Text>
@@ -492,7 +502,6 @@ export default function App() {
               title={isEditing ? 'Salvar' : 'Adicionar'}
               onPress={async () => {
                 handleAddTask();
-                await sendPushNotification(expoPushToken);
               }}
             />
             <Button title="Cancelar" onPress={() => {
